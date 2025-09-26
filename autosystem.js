@@ -9,21 +9,21 @@ module.exports = async ({ api }) => {
     greetings: {
       status: true,
       schedule: [
-        { start: { h: 5, m: 0 }, message: "Good morning everyone! Rise and shine ☀️" },
+        { start: { h: 5, m: 0 }, message: "Good morning everyone! rise and shine ☀️" },
         { start: { h: 6, m: 0 }, message: "Time for morning stretches! 🧘‍♂️" },
-        { start: { h: 7, m: 0 }, message: "🍳🥖 Breakfast time! Don't skip it 💪" },
-        { start: { h: 9, m: 0 }, message: "Keep hustling! 💼 Productivity vibes!" },
+        { start: { h: 7, m: 0 }, message: "Breakfast time! don't skip it 🍳🥖" },
+        { start: { h: 9, m: 0 }, message: "Keep hustling! productivity vibes  💼" },
         { start: { h: 11, m: 0 }, message: "Good late morning! Almost lunch 🍲" },
-        { start: { h: 12, m: 0 }, message: "🍲 Lunch time! Refuel your energy 🔋" },
-        { start: { h: 14, m: 0 }, message: "Afternoon vibes! Stay hydrated 💧" },
-        { start: { h: 15, m: 0 }, message: "🍪 Merienda time! Snack break ☕🥤" },
+        { start: { h: 12, m: 0 }, message: "🍲 Lunch time! wag nang kumain yung mga hindi minahal dyan" },
+        { start: { h: 14, m: 0 }, message: "Afternoon vibes! Stay hydrated 🤭" },
+        { start: { h: 15, m: 0 }, message: "Snack time mga bOwraT 🍜" },
         { start: { h: 17, m: 0 }, message: "Evening is coming! 🌆 Take a deep breath" },
         { start: { h: 18, m: 0 }, message: "Good evening everyone! 🌇 Time to relax" },
         { start: { h: 19, m: 0 }, message: "🍛 Dinner time! Eat well babies 🍗" },
         { start: { h: 21, m: 0 }, message: "Night vibes! 🌙 Almost bedtime 😴" },
         { start: { h: 22, m: 0 }, message: "10:00 pm, mag rerelapse na naman yung tanga dyan. 🥀" },
         { start: { h: 0, m: 0 }, message: "12 na tama na kakarelapse 💓" },
-        { start: { h: 2, m: 0 }, message: "Late night alert! 🦉 Don't stay up too long" },
+        { start: { h: 2, m: 0 }, message: "Late night alert! 🦉 Don't stay up too long baka pumanaw ka" },
         { start: { h: 4, m: 0 }, message: "Sunrise is comming 😍🌄" }
       ],
       weekend: "🎉 Happy weekend! Chill and enjoy your freedom 🏖️🍻",
@@ -86,25 +86,25 @@ module.exports = async ({ api }) => {
       }
 
       const weekday = now.toLocaleDateString("en-US", { weekday: "long", timeZone: "Asia/Manila" });
-      if (!sentToday.has(`day-${weekday}-${hour}`)) {
+      if (!sentToday.has(`day-${weekday}-${hour}-${minute}`)) {
         try {
           const threads = await api.getThreadList(100, null, ["INBOX"]);
           const groupThreads = threads.filter(t => t.isGroup);
 
-          if ((weekday === "Saturday" || weekday === "Sunday") && hour === 9) {
-            for (const thread of groupThreads) api.sendMessage(config.weekend, thread.threadID);
-            sentToday.add(`day-${weekday}-${hour}`);
-          } else if (weekday === "Monday" && hour === 8) {
-            for (const thread of groupThreads) api.sendMessage(config.monday, thread.threadID);
-            sentToday.add(`day-${weekday}-${hour}`);
-          } else if (weekday === "Friday" && hour === 20) {
-            for (const thread of groupThreads) api.sendMessage(config.friday, thread.threadID);
-            sentToday.add(`day-${weekday}-${hour}`);
-          }
-        } catch (err) {
-          logger("[greetings] Error sending weekly/daily greetings:", err);
-        }
-      }
+     if ((weekday === "Saturday" || weekday === "Sunday") && hour === 9 && minute === 0) {
+         for (const thread of groupThreads) api.sendMessage(config.weekend, thread.threadID);
+         sentToday.add(`day-${weekday}-${hour}-${minute}`);
+       } else if (weekday === "Monday" && hour === 8 && minute === 0) {
+         for (const thread of groupThreads) api.sendMessage(config.monday, thread.threadID);
+         sentToday.add(`day-${weekday}-${hour}-${minute}`);
+       } else if (weekday === "Friday" && hour === 20 && minute === 0) {
+         for (const thread of groupThreads) api.sendMessage(config.friday, thread.threadID);
+         sentToday.add(`day-${weekday}-${hour}-${minute}`);
+       }
+     } catch (err) {
+       logger("[greetings] Error sending weekly/daily greetings:", err);
+       }
+     }
     }, 1000 * 60); 
   }
 
