@@ -1,7 +1,7 @@
 module.exports.config = {
   name: "uptime",
   version: "1.0",
-  author: "ari",
+  credit: "ari",
   category: "members",
   description: "Shows how long the bot has been online"
 };
