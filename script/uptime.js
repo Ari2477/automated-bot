@@ -15,6 +15,7 @@ function getStartTime() {
 module.exports.config = {
   name: "uptime",
   version: "1.0",
+  aliases: ["upt"], 
   credit: "ari",
   category: "members",
   description: "Shows how long the bot has been online (persistent across restarts)"
