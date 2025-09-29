@@ -1,19 +1,15 @@
 module.exports.config = {
   name: "uptime",
-  version: "3.1",
+  version: "3.2",
   aliases: ["upt"], 
   credit: "ari",
   category: "members",
   description: "Shows how long the bot has been online"
 };
 
-if (!global.uptimeOffset) {
-  global.uptimeOffset = process.uptime();
-}
-
 module.exports.run = async function({ api, event, arg }) {
   try {
-    let totalSeconds = Math.floor(process.uptime() - global.uptimeOffset); 
+    let totalSeconds = Math.floor(process.uptime()); 
     
     const days = Math.floor(totalSeconds / 86400);
     totalSeconds %= 86400;
@@ -28,12 +24,14 @@ module.exports.run = async function({ api, event, arg }) {
     if (minutes > 0) uptimeString += `${minutes} Min${minutes > 1 ? "s" : ""} `;
     uptimeString += `${seconds} Sec${seconds > 1 ? "s" : ""}`;
 
-    const totalSlots = 12;
-    const filledSlots = Math.min(Math.round((minutes / 60) * totalSlots), totalSlots);
-    const emptySlots = totalSlots - filledSlots;
-    const bar = "█".repeat(filledSlots) + "░".repeat(emptySlots);
+    const startTime = new Date(Date.now() - Math.floor(process.uptime() * 1000));
+    const startedAt = startTime.toLocaleString("en-US", { 
+      timeZone: "Asia/Manila", 
+      dateStyle: "medium",
+      timeStyle: "short"
+    });
 
-    const message = `( ˘³˘)┌旦「 𝙾𝚗𝚕𝚒𝚗𝚎 」\nUptime: ${uptimeString}\n[ ${bar} ]`;
+    const message = `( ˘³˘)┌旦「 𝙾𝚗𝚕𝚒𝚗𝚎 」\nUptime: ${uptimeString}\nStarted: ${startedAt}`;
 
     await api.sendMessage(message, event.threadID, event.messageID);
   } catch (error) {
