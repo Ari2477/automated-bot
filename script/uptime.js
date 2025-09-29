@@ -1,17 +1,19 @@
 module.exports.config = {
   name: "uptime",
-  version: "2.2",
+  version: "3.0",
   aliases: ["upt"], 
   credit: "ari",
   category: "members",
   description: "Shows how long the bot has been online"
 };
 
-const botStart = Date.now();
+if (!global.botStart) {
+  global.botStart = Date.now();
+}
 
 module.exports.run = async function({ api, event, args }) {
   try {
-    let totalSeconds = Math.floor((Date.now() - botStart) / 1000); 
+    let totalSeconds = Math.floor((Date.now() - global.botStart) / 1000); 
     
     const days = Math.floor(totalSeconds / 86400);
     totalSeconds %= 86400;
