@@ -1,15 +1,17 @@
 module.exports.config = {
   name: "uptime",
-  version: "2.0",
+  version: "2.2",
   aliases: ["upt"], 
   credit: "ari",
   category: "members",
   description: "Shows how long the bot has been online"
 };
 
+const botStart = Date.now();
+
 module.exports.run = async function({ api, event, args }) {
   try {
-    let totalSeconds = Math.floor(process.uptime()); 
+    let totalSeconds = Math.floor((Date.now() - botStart) / 1000); 
     
     const days = Math.floor(totalSeconds / 86400);
     totalSeconds %= 86400;
@@ -25,7 +27,7 @@ module.exports.run = async function({ api, event, args }) {
     uptimeString += `${seconds} Sec${seconds > 1 ? "s" : ""}`;
 
     const totalSlots = 12;
-    const filledSlots = Math.round((hours / 24) * totalSlots);
+    const filledSlots = Math.min(Math.round((minutes / 60) * totalSlots), totalSlots);
     const emptySlots = totalSlots - filledSlots;
     const bar = "█".repeat(filledSlots) + "░".repeat(emptySlots);
 
