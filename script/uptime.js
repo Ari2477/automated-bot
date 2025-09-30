@@ -1,12 +1,10 @@
-const moment = require("moment");
-require("moment-duration-format");
-
 module.exports.config = {
   name: "uptime",
-  version: "1.0.3",
+  aliases: ["up"],
+  version: "1.0.4",
   hasPermssion: 0,
   credits: "ari",
-  description: "burat na malaki",
+  description: "burat na malaki ",
   commandCategory: "system",
   usages: "uptime",
   cooldowns: 5
@@ -19,13 +17,13 @@ if (!global.loginTime) {
 module.exports.run = async function({ api, event }) {
   let activeMs = Date.now() - global.loginTime;
 
-  let days = moment.duration(activeMs).days();
-  let hours = moment.duration(activeMs).hours();
-  let minutes = moment.duration(activeMs).minutes();
-  let seconds = moment.duration(activeMs).seconds();
+  let days = Math.floor(activeMs / (1000 * 60 * 60 * 24));
+  let hours = Math.floor((activeMs / (1000 * 60 * 60)) % 24);
+  let minutes = Math.floor((activeMs / (1000 * 60)) % 60);
+  let seconds = Math.floor((activeMs / 1000) % 60);
 
   let message = 
-`⏳ 𝗨𝗽𝘁𝗶𝗺𝗲 𝗦𝘁𝗮𝘁𝘂𝘀  
+`⏳ 𝗨𝗽𝘁𝗶𝗺𝗲 𝗦𝘁𝗮𝘁𝘂𝘀
 ━━━━━━━━━━━━━━━
 📆 Days   : ${days}
 🕒 Hours  : ${hours}
