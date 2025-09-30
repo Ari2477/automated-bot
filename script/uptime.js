@@ -85,10 +85,10 @@ module.exports.run = async ({ api, event }) => {
     ctx.lineWidth = 3;
     ctx.strokeRect(0, 0, width, height);
 
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = "";
     ctx.font = "bold 30px monospace";
-    const title = "BOT UPTIME";
-    const titleWidth = ctx.measureText(title).width;
+    const title = "[ BOT UPTIME ]";
+    const titleWidth = ctx.measureText(title).width; 
     ctx.fillText(title, (width - titleWidth) / 2, 50);
 
     ctx.font = "20px monospace";
@@ -117,7 +117,7 @@ module.exports.run = async ({ api, event }) => {
 
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 22px monospace";
-    const uptimeText = formatFont(`Uptime: ${module.exports.getUptime(uptimeSeconds)}`);
+    const uptimeText = formatFont(`${module.exports.getUptime(uptimeSeconds)}`);
     const uptimeWidth = ctx.measureText(uptimeText).width;
     ctx.fillText(uptimeText, (width - uptimeWidth) / 2, 200);
 
