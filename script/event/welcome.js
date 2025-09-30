@@ -50,9 +50,13 @@ module.exports.handleEvent = async function ({ api, event }) {
             ctx.drawImage(baseImage, 0, 0);
 
             ctx.font = '14px Arial';
-            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            ctx.fillStyle = 'rgba(255,255,255,0.85)';
             ctx.textAlign = 'left';
-            ctx.fillText(`Welcome to ${groupName}`, 20, baseImage.height - 20);
+
+            const startX = 220; 
+            const startY = 260; 
+
+            ctx.fillText(`Welcome to ${groupName}`, startX, startY + 30);
             
             ctx.font = '16px Arial';
             ctx.fillStyle = 'rgba(255,255,255,0.7)'; 
