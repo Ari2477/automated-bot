@@ -1,43 +1,82 @@
+const os = require("os");
+
+const startTime = new Date();
+
 module.exports.config = {
   name: "uptime",
-  version: "3.4",
-  aliases: ["upt"], 
-  credit: "ari",
-  category: "members",
-  description: "Shows how long the bot has been online"
+  aliases: ["up"],
+  author: "ari",
+  role: 0,
+  description: "Get system uptime and status",
+  usage: "uptime",
+  category: "system"
 };
 
-module.exports.run = async function({ api, event, arg}) {
+module.exports.run = async function ({ api, event, args, usersData, threadsData }) {
   try {
-    let totalSeconds = Math.floor(process.uptime());
+    const uptimeInSeconds = (new Date() - startTime) / 1000;
 
-    const days = Math.floor(totalSeconds / 86400);
-    totalSeconds -= days * 86400;
+    const days = Math.floor(uptimeInSeconds / (3600 * 24));
+    const hours = Math.floor((uptimeInSeconds % (3600 * 24)) / 3600);
+    const minutes = Math.floor((uptimeInSeconds % 3600) / 60);
+    const secondsLeft = Math.floor(uptimeInSeconds % 60);
+    const uptimeFormatted = `${days}d ${hours}h ${minutes}m ${secondsLeft}s`;
 
-    const hours = Math.floor(totalSeconds / 3600);
-    totalSeconds -= hours * 3600;
+    const cpuUsage =
+      os
+        .cpus()
+        .map((cpu) => cpu.times.user)
+        .reduce((acc, curr) => acc + curr) / os.cpus().length;
 
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
+    const totalMemoryGB = os.totalmem() / 1024 ** 3;
+    const freeMemoryGB = os.freemem() / 1024 ** 3;
+    const usedMemoryGB = totalMemoryGB - freeMemoryGB;
 
-    let uptimeString = "";
-    if (days > 0) uptimeString += `${days} Day${days > 1 ? "s" : ""} `;
-    if (hours > 0) uptimeString += `${hours} Hr${hours > 1 ? "s" : ""} `;
-    if (minutes > 0) uptimeString += `${minutes} Min${minutes > 1 ? "s" : ""} `;
-    uptimeString += `${seconds} Sec${seconds > 1 ? "s" : ""}`;
+    const allUsers = await usersData.getAll();
+    const allThreads = await threadsData.getAll();
 
-    const startTime = new Date(Date.now() - Math.floor(process.uptime() * 1000));
-    const startedAt = startTime.toLocaleString("en-US", { 
-      timeZone: "Asia/Manila",
-      dateStyle: "medium",
-      timeStyle: "medium"
+    const currentDate = new Date();
+    const date = currentDate.toLocaleDateString("en-US");
+    const time = currentDate.toLocaleTimeString("en-US", {
+      timeZone: "Asia/Kolkata",
+      hour12: true,
     });
 
-    const message = `🟢 Bot is Online\n\n⏳ Uptime: ${uptimeString}\n🕒 Started: ${startedAt}`;
+    const pingStart = Date.now();
+    await api.sendMessage("🔎 Checking system...", event.threadID, event.messageID);
+    const ping = Date.now() - pingStart;
 
-    await api.sendMessage(message, event.threadID, event.messageID);
+    let pingStatus = "⛔ Bad System";
+    if (ping < 1000) pingStatus = "✅ Smooth System";
+
+    const systemInfo = `♡   ∩_∩
+ （„• ֊ •„)♡
+╭─∪∪────────────⟡
+│ 𝗨𝗣𝗧𝗜𝗠𝗘 𝗜𝗡𝗙𝗢
+├───────────────⟡
+│ ⏰ Runtime: ${uptimeFormatted}
+├───────────────⟡
+│ 👑 System Info
+│ OS: ${os.type()} ${os.arch()}
+│ Node: ${process.version}
+│ CPU: ${os.cpus()[0].model}
+│ Storage: ${usedMemoryGB.toFixed(2)} GB / ${totalMemoryGB.toFixed(2)} GB
+│ CPU Usage: ${cpuUsage.toFixed(1)}%
+│ RAM Usage: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
+├───────────────⟡
+│ ✅ Other Info
+│ Date: ${date}
+│ Time: ${time}
+│ Users: ${allUsers.length}
+│ Threads: ${allThreads.length}
+│ Ping: ${ping}ms
+│ Status: ${pingStatus}
+╰───────────────⟡`;
+
+    api.sendMessage(systemInfo, event.threadID, event.messageID);
+
   } catch (error) {
-    console.error(error);
-    await api.sendMessage("⚠️ Failed to retrieve uptime.", event.threadID, event.messageID);
+    console.error("Error:", error);
+    api.sendMessage("❌ Unable to retrieve system information.", event.threadID, event.messageID);
   }
 };
