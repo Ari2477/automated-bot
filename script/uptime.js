@@ -1,8 +1,9 @@
 const os = require("os");
+const pidusage = require("pidusage");
 
 module.exports.config = {
   name: "uptime",
-  version: "1.0.3",
+  version: "1.0.5",
   hasPermssion: 0,
   credits: "ari",
   description: "Check bot uptime and system info",
@@ -23,18 +24,20 @@ function byte2mb(bytes) {
 
 module.exports.languages = {
   "en": {
-    "returnResult": "🤖 BOT UPTIME\n━━━━━━━━━━━━━━━━━━\n⏳ %1h %2m %3s\n👤 Users: %4\n💬 Threads: %5\n⚡ CPU: %6%\n💾 RAM: %7\n🖥️ Cores: %8\n📡 Ping: %9ms\n💻 Platform: %10\n🔧 Arch: %11"
+    "returnResult": "🤖 BOT UPTIME\n━━━━━━━━━━━━━━━━━━\n⏳ %1d %2h %3m %4s\n👤 Users: %5\n💬 Threads: %6\n⚡ CPU: %7%\n💾 RAM: %8\n🖥️ Cores: %9\n📡 Ping: %10ms\n💻 Platform: %11\n🔧 Arch: %12"
   }
 };
 
 module.exports.run = async ({ api, event, args, getText }) => {
   try {
-    const time = process.uptime(),
-      hours = Math.floor(time / (60 * 60)),
-      minutes = Math.floor((time % (60 * 60)) / 60),
-      seconds = Math.floor(time % 60);
+    const time = process.uptime();
 
-    const pidusage = await global.nodemodule["pidusage"](process.pid);
+    const days = Math.floor(time / (60 * 60 * 24));
+    const hours = Math.floor((time % (60 * 60 * 24)) / (60 * 60));
+    const minutes = Math.floor((time % (60 * 60)) / 60);
+    const seconds = Math.floor(time % 60);
+
+    const usage = await pidusage(process.pid);
     const osInfo = {
       platform: os.platform(),
       architecture: os.arch(),
@@ -42,12 +45,11 @@ module.exports.run = async ({ api, event, args, getText }) => {
     };
 
     const timeStart = Date.now();
-
     let mode = args[0] || "normal";
 
     if (mode === "short") {
       return api.sendMessage(
-        `⏳ Uptime: ${hours}h ${minutes}m ${seconds}s\n⚡ CPU: ${pidusage.cpu.toFixed(1)}%\n💾 RAM: ${byte2mb(pidusage.memory)}`,
+        `⏳ Uptime: ${days}d ${hours}h ${minutes}m ${seconds}s\n⚡ CPU: ${usage.cpu.toFixed(1)}%\n💾 RAM: ${byte2mb(usage.memory)}`,
         event.threadID,
         event.messageID
       );
@@ -56,13 +58,14 @@ module.exports.run = async ({ api, event, args, getText }) => {
     return api.sendMessage(
       getText(
         "returnResult",
+        days,
         hours,
         minutes,
         seconds,
         global.data.allUserID.length,
         global.data.allThreadID.length,
-        pidusage.cpu.toFixed(1),
-        byte2mb(pidusage.memory),
+        usage.cpu.toFixed(1),
+        byte2mb(usage.memory),
         osInfo.cores,
         Date.now() - timeStart,
         osInfo.platform,
