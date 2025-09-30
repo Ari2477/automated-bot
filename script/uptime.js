@@ -28,7 +28,7 @@ module.exports.languages = {
   }
 };
 
-module.exports.run = async ({ api, event, args, getText }) => {
+module.exports.run = async ({ api, event, args }) => {
   try {
     const time = process.uptime();
 
