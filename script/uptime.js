@@ -12,7 +12,7 @@ module.exports.config = {
   category: "system"
 };
 
-module.exports.run = async function ({ api, event, args, usersData, threadsData }) {
+module.exports.run = async function ({ api, event, args }) {
   try {
     const uptimeInSeconds = (new Date() - startTime) / 1000;
 
@@ -67,8 +67,6 @@ module.exports.run = async function ({ api, event, args, usersData, threadsData 
 │ ✅ Other Info
 │ Date: ${date}
 │ Time: ${time}
-│ Users: ${allUsers.length}
-│ Threads: ${allThreads.length}
 │ Ping: ${ping}ms
 │ Status: ${pingStatus}
 ╰───────────────⟡`;
