@@ -1,90 +1,102 @@
 const os = require("os");
 
-const startTime = new Date();
-
 module.exports.config = {
   name: "uptime",
-  aliases: ["up"],
-  author: "Ari",
+  aliases: ["up", "status", "sysup"],
+  description: "Show bot uptime, system info, ping, RAM, CPU.",
+  version: "1.1.0",
   role: 0,
-  description: "Get system uptime and status",
-  usage: "uptime",
-  category: "system"
+  cooldown: 0,
+  credits: "Ari",
+  hasPrefix: false,
+  usage: "uptime [ping|ram|cpu]"
 };
 
-module.exports.run = async function ({ api, event, args, usersData, threadsData }) {
+module.exports.run = async function ({ api, event, args }) {
   try {
-    const uptimeInSeconds = (new Date() - startTime) / 1000;
+    const { threadID, messageID } = event;
+    const query = args[0] ? args[0].toLowerCase() : "default";
 
-    const days = Math.floor(uptimeInSeconds / (3600 * 24));
-    const hours = Math.floor((uptimeInSeconds % (3600 * 24)) / 3600);
-    const minutes = Math.floor((uptimeInSeconds % 3600) / 60);
-    const secondsLeft = Math.floor(uptimeInSeconds % 60);
-    const uptimeFormatted = `${days}d ${hours}h ${minutes}m ${secondsLeft}s`;
+    const uptimeFormatted = getLiveUptime();
 
-    const cpuUsage =
-      os
-        .cpus()
-        .map((cpu) => cpu.times.user)
-        .reduce((acc, curr) => acc + curr) / os.cpus().length;
+    const osInfo = `${os.type()} ${os.release()} ${os.arch()} (${os.platform()})`;
+    const totalMemory = formatBytes(os.totalmem());
+    const freeMemory = formatBytes(os.freemem());
+    const usedMemory = formatBytes(os.totalmem() - os.freemem());
+    const cpuModel = os.cpus()[0].model;
 
-    const totalMemoryGB = os.totalmem() / 1024 ** 3;
-    const freeMemoryGB = os.freemem() / 1024 ** 3;
-    const usedMemoryGB = totalMemoryGB - freeMemoryGB;
+    const now = new Date();
+    const date = now.toLocaleDateString("en-PH", { timeZone: "Asia/Manila" });
+    const time = now.toLocaleTimeString("en-PH", { timeZone: "Asia/Manila", hour12: true });
 
-    let allUsers = [];
-    let allThreads = [];
-    if (usersData && usersData.getAll) {
-      allUsers = await usersData.getAll();
-    }
-    if (threadsData && threadsData.getAll) {
-      allThreads = await threadsData.getAll();
-    }
+    let message = "";
 
-    const currentDate = new Date();
-    const date = currentDate.toLocaleDateString("en-PH", {
-      timeZone: "Asia/Manila"
-    });
-    const time = currentDate.toLocaleTimeString("en-PH", {
-      timeZone: "Asia/Manila",
-      hour12: true,
-    });
+    switch (query) {
+      case "ping":
+        const start = Date.now();
+        await api.sendMessage("🏓 Pinging...", threadID);
+        const ping = Date.now() - start;
+        message = `🏓 Pong! Response time: ${ping}ms`;
+        break;
 
-    const pingStart = Date.now();
-    await api.sendMessage("🔎 Checking system...", event.threadID, event.messageID);
-    const ping = Date.now() - pingStart;
+      case "ram":
+        message =
+`💾 𝗥𝗔𝗠 𝗨𝗦𝗔𝗚𝗘
+• Used: ${usedMemory}
+• Free: ${freeMemory}
+• Total: ${totalMemory}`;
+        break;
 
-    let pingStatus = "⛔ Bad System";
-    if (ping < 1000) pingStatus = "✅ Smooth System";
+      case "cpu":
+        message =
+`🖥️ 𝗖𝗣𝗨 𝗜𝗡𝗙𝗢
+• Model: ${cpuModel}
+• Cores: ${os.cpus().length}`;
+        break;
 
-    const systemInfo = `♡   ∩_∩
+      default:
+        message =
+`♡   ∩_∩
  （„• ֊ •„)♡
 ╭─∪∪────────────⟡
-│ 𝗨𝗣𝗧𝗜𝗠𝗘 𝗜𝗡𝗙𝗢
+│ ⏰ 𝗥𝗨𝗡𝗧𝗜𝗠𝗘
+│ ${uptimeFormatted}
 ├───────────────⟡
-│ ⏰ Runtime: ${uptimeFormatted}
+│ 👑 𝗦𝗬𝗦𝗧𝗘𝗠
+│ OS: ${osInfo}
+│ CPU: ${cpuModel}
+│ RAM: ${usedMemory} / ${totalMemory}
 ├───────────────⟡
-│ 👑 System Info
-│ OS: ${os.type()} ${os.arch()}
-│ Node: ${process.version}
-│ CPU: ${os.cpus()[0].model}
-│ Storage: ${usedMemoryGB.toFixed(2)} GB / ${totalMemoryGB.toFixed(2)} GB
-│ CPU Usage: ${cpuUsage.toFixed(1)}%
-│ RAM Usage: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
-├───────────────⟡
-│ ✅ Other Info
-│ Date: ${date}
-│ Time: ${time}
-│ Users: ${allUsers.length || 0}
-│ Threads: ${allThreads.length || 0}
-│ Ping: ${ping}ms
-│ Status: ${pingStatus}
+│ 📅 DATE: ${date}
+│ ⏰ TIME: ${time}
 ╰───────────────⟡`;
+    }
 
-    api.sendMessage(systemInfo, event.threadID, event.messageID);
+    api.sendMessage(message, threadID, messageID);
 
   } catch (error) {
     console.error("Error:", error);
-    api.sendMessage("❌ Unable to retrieve system information.", event.threadID, event.messageID);
+    api.sendMessage("❌ Unable to retrieve uptime/system info.", event.threadID, event.messageID);
   }
 };
+
+function getLiveUptime() {
+  const totalSeconds = Math.floor(process.uptime());
+  return convertTime(totalSeconds);
+}
+
+function convertTime(totalSeconds) {
+  const days = Math.floor(totalSeconds / (24 * 60 * 60));
+  const hours = Math.floor((totalSeconds % (24 * 60 * 60)) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+}
+
+function formatBytes(bytes) {
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  if (bytes === 0) return '0 Byte';
+  const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+  return Math.round(100 * (bytes / Math.pow(1024, i))) / 100 + ' ' + sizes[i];
+}
