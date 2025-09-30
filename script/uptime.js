@@ -1,10 +1,10 @@
 module.exports.config = {
   name: "uptime",
   aliases: ["up"],
-  version: "1.0.4",
+  version: "1.2.1",
   hasPermssion: 0,
   credits: "ari",
-  description: "burat na malaki ",
+  description: "Displays bot uptime",
   commandCategory: "system",
   usages: "uptime",
   cooldowns: 5
@@ -22,15 +22,25 @@ module.exports.run = async function({ api, event }) {
   let minutes = Math.floor((activeMs / (1000 * 60)) % 60);
   let seconds = Math.floor((activeMs / 1000) % 60);
 
-  let message = 
-`⏳ 𝗨𝗽𝘁𝗶𝗺𝗲 𝗦𝘁𝗮𝘁𝘂𝘀
-━━━━━━━━━━━━━━━
-📆 Days   : ${days}
-🕒 Hours  : ${hours}
-⏰ Mins   : ${minutes}
-⌛ Secs   : ${seconds}
-━━━━━━━━━━━━━━━
-🤖 Bot has been running smoothly since login!`;
+  let totalSeconds = activeMs / 1000;
+  let scaleSeconds = 7 * 24 * 60 * 60; 
+  let percentage = Math.min(totalSeconds / scaleSeconds, 1);
+
+  let progressBarLength = 10; 
+  let filledLength = Math.floor(progressBarLength * percentage);
+
+  let progressBar = "█".repeat(filledLength) + "─".repeat(progressBarLength - filledLength);
+
+  let message =
+`⏳ 𝐔𝐩𝐭𝐢𝐦𝐞 𝐬𝐭𝐚𝐭𝐮𝐬 
+━━━━━━━━━━━━━━
+[${progressBar}] ${(percentage * 100).toFixed(1)}%
+📅 Dᴀʏ    : ${days}
+🕒 Hᴏᴜʀs  : ${hours}
+⏰ Mɪɴᴜᴛᴇs: ${minutes}
+⌛ Sᴇᴄᴏɴᴅs: ${seconds}
+━━━━━━━━━━━━━━
+🤖 Bot has been running smoothly! 🚀`;
 
   return api.sendMessage(message, event.threadID, event.messageID);
 };
