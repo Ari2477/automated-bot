@@ -56,25 +56,25 @@ module.exports.run = async ({ api, event, args, getText }) => {
     }
 
     return api.sendMessage(
-      getText(
-        "returnResult",
-        days,
-        hours,
-        minutes,
-        seconds,
-        global.data.allUserID.length,
-        global.data.allThreadID.length,
-        usage.cpu.toFixed(1),
-        byte2mb(usage.memory),
-        osInfo.cores,
-        Date.now() - timeStart,
-        osInfo.platform,
-        osInfo.architecture
-      ),
-      event.threadID,
-      event.messageID
-    );
-
+  getText(
+    "returnResult",
+    days,
+    hours,
+    minutes,
+    seconds,
+    global.data?.allUserID?.length || 0,
+    global.data?.allThreadID?.length || 0,
+    usage.cpu.toFixed(1),
+    byte2mb(usage.memory),
+    osInfo.cores,
+    Date.now() - timeStart,
+    osInfo.platform,
+    osInfo.architecture
+  ),
+  event.threadID,
+  event.messageID
+);
+    
   } catch (err) {
     return api.sendMessage(`❌ Error: ${err.message}`, event.threadID, event.messageID);
   }
