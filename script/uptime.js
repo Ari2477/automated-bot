@@ -42,9 +42,11 @@ module.exports.run = async function ({ api, event, args, usersData, threadsData 
     }
 
     const currentDate = new Date();
-    const date = currentDate.toLocaleDateString("en-US");
-    const time = currentDate.toLocaleTimeString("en-US", {
-      timeZone: "Asia/Kolkata",
+    const date = currentDate.toLocaleDateString("en-PH", {
+      timeZone: "Asia/Manila"
+    });
+    const time = currentDate.toLocaleTimeString("en-PH", {
+      timeZone: "Asia/Manila",
       hour12: true,
     });
 
