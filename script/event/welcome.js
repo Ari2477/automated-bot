@@ -49,11 +49,22 @@ module.exports.handleEvent = async function ({ api, event }) {
             
             ctx.drawImage(baseImage, 0, 0);
 
-            ctx.font = '22px Arial';
-            ctx.fillStyle = 'rgba(255,255,255,0.9)'; 
+            ctx.font = 'bold 28px "Arial"';
             ctx.textAlign = 'center';
-            ctx.fillText(`Welcome to ${groupName}`, baseImage.width / 2, baseImage.height - 40);
 
+            const gradient = ctx.createLinearGradient(
+                baseImage.width / 4, 0,
+               (baseImage.width / 4) * 3, 0
+            );
+            gradient.addColorStop(0, '#ff6ec4');  
+            gradient.addColorStop(0.5, '#7873f5');
+            gradient.addColorStop(1, '#4ade80');  
+
+            ctx.fillStyle = gradient;
+            ctx.shadowColor = 'rgba(0,0,0,0.6)';
+            ctx.shadowBlur = 6;
+            ctx.fillText(`Welcome to ${groupName}`, baseImage.width / 2, baseImage.height - 60);
+            
             ctx.font = '16px Arial';
             ctx.fillStyle = 'rgba(255,255,255,0.7)'; 
             ctx.textAlign = 'right';
