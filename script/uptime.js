@@ -17,7 +17,7 @@ function formatFont(text) {
 
 module.exports.config = {
     name: "uptime",
-    version: "1.0.3",
+    version: "1.0.5",
     role: 0,
     credits: "ari",
     description: "Get bot uptime and system information",
@@ -62,12 +62,8 @@ module.exports.getUptime = (uptime) => {
 
 function drawPixelIcon(ctx, x, y, color) {
     ctx.fillStyle = color;
-    const size = 10;
-    for (let i = 0; i < 2; i++) {
-        for (let j = 0; j < 2; j++) {
-            ctx.fillRect(x + i*size, y + j*size, size, size);
-        }
-    }
+    const size = 12;
+    ctx.fillRect(x, y - size + 2, size, size);
 }
 
 module.exports.run = async ({ api, event }) => {
@@ -75,14 +71,10 @@ module.exports.run = async ({ api, event }) => {
     const uptimeSeconds = Math.floor((Date.now() - startTime) / 1000);
     const usage = await pidusage(process.pid);
 
-    const osInfo = {
-        platform: os.platform(),
-        architecture: os.arch(),
-        cpus: os.cpus().length
-    };
+    const osInfo = { cpus: os.cpus().length };
 
-    const width = 800;
-    const height = 200;
+    const width = 820;
+    const height = 250;
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
@@ -90,33 +82,49 @@ module.exports.run = async ({ api, event }) => {
     ctx.fillRect(0, 0, width, height);
 
     ctx.strokeStyle = "#00ff00";
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 3;
     ctx.strokeRect(0, 0, width, height);
 
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 24px monospace";
-    ctx.fillText(formatFont(`Uptime: ${module.exports.getUptime(uptimeSeconds)}`), 20, 50);
+    ctx.font = "bold 30px monospace";
+    const title = "BOT UPTIME";
+    const titleWidth = ctx.measureText(title).width;
+    ctx.fillText(title, (width - titleWidth) / 2, 50);
 
     ctx.font = "20px monospace";
-    let yStart = 120;
+    const infos = [
+        { text: formatFont(`CPU: ${usage.cpu.toFixed(1)}%`), color: "#ff5555" },
+        { text: formatFont(`RAM: ${module.exports.byte2mb(usage.memory)}`), color: "#55ff55" },
+        { text: formatFont(`Cores: ${osInfo.cpus}`), color: "#5555ff" },
+        { text: formatFont(`Ping: ${Date.now() - event.timestamp}ms`), color: "#ffff55" }
+    ];
 
-    drawPixelIcon(ctx, 20, yStart - 15, "#ff5555");
-    ctx.fillText(formatFont(` CPU: ${usage.cpu.toFixed(1)}%`), 50, yStart);
+    const padding = 30;
+    const iconSize = 20;
+    let totalWidth = -padding;
+    infos.forEach(info => {
+        totalWidth += ctx.measureText(info.text).width + iconSize + padding;
+    });
 
-    drawPixelIcon(ctx, 300, yStart - 15, "#55ff55");
-    ctx.fillText(formatFont(` RAM: ${module.exports.byte2mb(usage.memory)}`), 330, yStart);
+    let startX = (width - totalWidth) / 2;
+    let y = 120;
+    infos.forEach(info => {
+        drawPixelIcon(ctx, startX, y, info.color);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(info.text, startX + iconSize + 8, y);
+        startX += ctx.measureText(info.text).width + iconSize + padding;
+    });
 
-    drawPixelIcon(ctx, 520, yStart - 15, "#5555ff");
-    ctx.fillText(formatFont(` Cores: ${osInfo.cpus}`), 550, yStart);
-
-    drawPixelIcon(ctx, 700, yStart - 15, "#ffff55");
-    ctx.fillText(formatFont(` Ping: ${Date.now() - event.timestamp}ms`), 730, yStart);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 22px monospace";
+    const uptimeText = formatFont(`Uptime: ${module.exports.getUptime(uptimeSeconds)}`);
+    const uptimeWidth = ctx.measureText(uptimeText).width;
+    ctx.fillText(uptimeText, (width - uptimeWidth) / 2, 200);
 
     const buffer = canvas.toBuffer('image/png');
     const filePath = './uptime.png';
     await fs.writeFile(filePath, buffer);
-  
-    await api.sendMessage({ attachment: fs.createReadStream(filePath) }, event.threadID, event.messageID);
 
+    await api.sendMessage({ attachment: fs.createReadStream(filePath) }, event.threadID, event.messageID);
     await module.exports.saveStartTimestamp(startTime);
 };
