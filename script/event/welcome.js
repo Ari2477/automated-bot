@@ -49,7 +49,7 @@ module.exports.handleEvent = async function ({ api, event }) {
             
             ctx.drawImage(baseImage, 0, 0);
 
-            ctx.font = 'bold 28px "Arial"';
+            ctx.font = 'bold 23px "Arial"';
             ctx.textAlign = 'center';
 
             const gradient = ctx.createLinearGradient(
