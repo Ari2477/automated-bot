@@ -5,14 +5,14 @@ const startTime = new Date();
 module.exports.config = {
   name: "uptime",
   aliases: ["up"],
-  author: "ari",
+  author: "Ari",
   role: 0,
   description: "Get system uptime and status",
   usage: "uptime",
   category: "system"
 };
 
-module.exports.run = async function ({ api, event, args }) {
+module.exports.run = async function ({ api, event, args, usersData, threadsData }) {
   try {
     const uptimeInSeconds = (new Date() - startTime) / 1000;
 
@@ -32,8 +32,14 @@ module.exports.run = async function ({ api, event, args }) {
     const freeMemoryGB = os.freemem() / 1024 ** 3;
     const usedMemoryGB = totalMemoryGB - freeMemoryGB;
 
-    const allUsers = await usersData.getAll();
-    const allThreads = await threadsData.getAll();
+    let allUsers = [];
+    let allThreads = [];
+    if (usersData && usersData.getAll) {
+      allUsers = await usersData.getAll();
+    }
+    if (threadsData && threadsData.getAll) {
+      allThreads = await threadsData.getAll();
+    }
 
     const currentDate = new Date();
     const date = currentDate.toLocaleDateString("en-US");
@@ -67,6 +73,8 @@ module.exports.run = async function ({ api, event, args }) {
 │ ✅ Other Info
 │ Date: ${date}
 │ Time: ${time}
+│ Users: ${allUsers.length || 0}
+│ Threads: ${allThreads.length || 0}
 │ Ping: ${ping}ms
 │ Status: ${pingStatus}
 ╰───────────────⟡`;
