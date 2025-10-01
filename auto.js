@@ -202,10 +202,10 @@ app.post('/login', async (req, res) => {
           await accountLogin(state, commands, prefix, [admin]);
           console.log(`
           🎉✨ LOGIN SUCCESSFUL! ✨🎉
-          Welcome, admin!
-          ======================
-          🚀 Session initialized.
-          🌐 Enjoy your automation experience.
+                Welcome, admin!
+            ======================
+            🚀 Session initialized.
+      🌐 Enjoy your automation experience.
        `);
           res.status(200).json({
           success: true,
