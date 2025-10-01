@@ -99,6 +99,4 @@ module.exports.run = async ({ api, event }) => {
         event.threadID,
         event.messageID
     );
-
-    await module.exports.saveStartTimestamp(startTime);
 };
