@@ -1,11 +1,11 @@
-const { createCanvas } = require('canvas');
+ const { createCanvas } = require('canvas');
 const fs = require('fs-extra');
 const os = require('os');
 const pidusage = require('pidusage');
 
 module.exports.config = {
     name: "uptime",
-    version: "1.1.1",
+    version: "1.2.0",
     role: 0,
     credits: "ari",
     description: "Get bot uptime and system information",
@@ -21,12 +21,19 @@ module.exports.byte2mb = (bytes) => {
     return `${n.toFixed(n < 10 && l > 0 ? 1 : 0)} ${units[l]}`;
 };
 
-module.exports.getStartTimestamp = async () => {
+module.exports.getStartTimestamp = async (forceReset = false) => {
     try {
-        const startTimeStr = await fs.readFile('./time.txt', 'utf8');
-        return parseInt(startTimeStr);
+        if (!forceReset) {
+            const startTimeStr = await fs.readFile('./time.txt', 'utf8');
+            return parseInt(startTimeStr);
+        }
+        const now = Date.now();
+        await module.exports.saveStartTimestamp(now);
+        return now;
     } catch {
-        return Date.now();
+        const now = Date.now();
+        await module.exports.saveStartTimestamp(now);
+        return now;
     }
 };
 
