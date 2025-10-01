@@ -200,9 +200,16 @@ app.post('/login', async (req, res) => {
       } else {
         try {
           await accountLogin(state, commands, prefix, [admin]);
+          console.log(`
+          🎉✨ LOGIN SUCCESSFUL! ✨🎉
+          Welcome, admin!
+          ======================
+          🚀 Session initialized.
+          🌐 Enjoy your automation experience.
+       `);
           res.status(200).json({
-            success: true,
-            message: 'Authentication process completed successfully; login achieved.'
+          success: true,
+          message: "🎉 Authentication complete! Login successful."
           });
         } catch (error) {
           console.error(error);
@@ -215,13 +222,13 @@ app.post('/login', async (req, res) => {
     } else {
       return res.status(400).json({
         error: true,
-        message: "There's an issue with the appstate data; it's invalid."
+        message: "⚠️ There's an issue with the appstate data; it's invalid."
       });
     }
   } catch (error) {
     return res.status(400).json({
       error: true,
-      message: "There's an issue with the appstate data; it's invalid."
+      message: "⚠️ There's an issue with the appstate data; it's invalid."
     });
   }
 });
