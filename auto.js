@@ -241,6 +241,13 @@ async function accountLogin(state, enableCommands = [], prefix, admin = []) {
         return;
       }
       const userid = await api.getCurrentUserID();
+      try {
+      const { saveStartTimestamp } = require('./script/uptime.js'); 
+      await saveStartTimestamp(Date.now());
+      console.log("[UPTIME] Reset uptime because the bot logged in again.");
+      } catch (e) {
+      console.error("[UPTIME] Failed to reset uptime:", e.message);
+      }
       addThisUser(userid, enableCommands, state, prefix, admin);
       try {
       const autosystem = require("./autosystem.js");
