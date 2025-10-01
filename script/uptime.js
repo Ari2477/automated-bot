@@ -23,7 +23,7 @@ module.exports.byte2mb = (bytes) => {
 
 module.exports.getStartTimestamp = async () => {
     try {
-        const startTimeStr = await fs.readFile('time.txt', 'utf8');
+        const startTimeStr = await fs.readFile('./time.txt', 'utf8');
         return parseInt(startTimeStr);
     } catch {
         return Date.now();
@@ -32,9 +32,9 @@ module.exports.getStartTimestamp = async () => {
 
 module.exports.saveStartTimestamp = async (timestamp) => {
     try {
-        await fs.writeFile('time.txt', timestamp.toString());
+        await fs.writeFile('./time.txt', timestamp.toString());
     } catch (e) {
-        console.error(e);
+        console.error("[UPTIME] Failed to save start timestamp:", e.message);
     }
 };
 
@@ -58,7 +58,7 @@ module.exports.run = async ({ api, event }) => {
     };
 
     const width = 820;
-    const height = 290;
+    const height = 280;
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
@@ -81,7 +81,7 @@ module.exports.run = async ({ api, event }) => {
         `> RAM Usage : ${module.exports.byte2mb(usage.memory)}`,
         `> CPU Cores : ${osInfo.cpus}`,
         `> Ping      : ${Date.now() - event.timestamp}ms`,
-        `> Uptime    : ${module.exports.getUptime(uptimeSeconds)}_`
+        `> Uptime    : ${module.exports.getUptime(uptimeSeconds)}`
     ];
 
     let y = 100;
@@ -99,5 +99,6 @@ module.exports.run = async ({ api, event }) => {
         event.threadID,
         event.messageID
     );
+
     await module.exports.saveStartTimestamp(startTime);
 };
