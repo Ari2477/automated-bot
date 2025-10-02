@@ -5,7 +5,7 @@ const os = require('os');
 
 module.exports.config = {
     name: "uptime",
-    version: "1.0.6",
+    version: "1.0.8",
     role: 0,
     credits: "ari",
     description: "Get bot uptime and system information",
@@ -27,7 +27,7 @@ module.exports.getUptime = () => {
     const hours = Math.floor((uptime % (3600 * 24)) / 3600);
     const mins = Math.floor((uptime % 3600) / 60);
     const seconds = Math.floor(uptime % 60);
-    return `${days}day(s) ${hours}hour(s) ${mins}minute(s) ${seconds}second(s)`;
+    return `${days}d ${hours}h ${mins}m ${seconds}s`;
 };
 
 module.exports.run = async ({ api, event }) => {
@@ -46,7 +46,7 @@ module.exports.run = async ({ api, event }) => {
     ctx.strokeStyle = "#00ff00";
     ctx.lineWidth = 3;
     ctx.strokeRect(0, 0, width, height);
-
+    
     ctx.fillStyle = "#00ff00";
     ctx.font = "bold 28px monospace";
     const title = "[ SYSTEM STATUS ]";
@@ -64,7 +64,7 @@ module.exports.run = async ({ api, event }) => {
 
     let y = 100;
     infos.forEach(line => {
-        ctx.fillText(formatFont(line), 60, y);
+        ctx.fillText(line, 60, y); 
         y += 35;
     });
 
