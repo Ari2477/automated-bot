@@ -222,13 +222,13 @@ app.post('/login', async (req, res) => {
     } else {
       return res.status(400).json({
         error: true,
-        message: "⚠️ There's an issue with the appstate data; it's invalid."
+        message: "There's an issue with the appstate data; it's invalid."
       });
     }
   } catch (error) {
     return res.status(400).json({
       error: true,
-      message: "⚠️ There's an issue with the appstate data; it's invalid."
+      message: "There's an issue with the appstate data; it's invalid."
     });
   }
 });
@@ -307,8 +307,7 @@ async function accountLogin(state, enableCommands = [], prefix, admin = []) {
             console.log(error)
           }
           let database = fs.existsSync('./data/database.json') ? JSON.parse(fs.readFileSync('./data/database.json', 'utf8')) : createDatabase();
-          let data = Array.isArray(database) ? database.find(item => Object.keys(item)[0] === event?.threadID) : {};
-          let adminIDS = data ? database : createThread(event.threadID, api);
+          let data = Array.isArray(database) ? database.findateThread(event.threadID, api);
           let blacklist = (JSON.parse(fs.readFileSync('./data/history.json', 'utf-8')).find(blacklist => blacklist.userid === userid) || {}).blacklist || [];
           let hasPrefix = (event.body && aliases((event.body || '')?.trim().toLowerCase().split(/ +/).shift())?.hasPrefix == false) ? '' : prefix;
           let [command, ...args] = ((event.body || '').trim().toLowerCase().startsWith(hasPrefix?.toLowerCase()) ? (event.body || '').trim().substring(hasPrefix?.length).trim().split(/\s+/).map(arg => arg.trim()) : []);
