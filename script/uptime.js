@@ -16,109 +16,109 @@ function formatFont(text) {
       formattedText += char;
     }
   }
-
   return formattedText;
 }
 
-const tae = require('fs-extra');
-const fs = require('fs').promises;
+const fs = require('fs');             
+const fsp = require('fs').promises;  
 const pidusage = require('pidusage');
 const { createCanvas } = require('canvas');
+const os = require('os');
 
 module.exports.config = {
-    name: "uptime",
-    version: "1.0.4",
-    role: 0,
-    credits: "ari",
-    description: "Get bot uptime and system information",
-    hasPrefix: false,
-    cooldown: 5,
-    aliases: ["up"]
+  name: "uptime",
+  version: "1.0.4",
+  role: 0,
+  credits: "ari",
+  description: "Get bot uptime and system information",
+  hasPrefix: false,
+  cooldown: 5,
+  aliases: ["up"]
 };
 
 module.exports.byte2mb = (bytes) => {
-    const units = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-    let l = 0, n = parseInt(bytes, 10) || 0;
-    while (n >= 1024 && ++l) n = n / 1024;
-    return `${n.toFixed(n < 10 && l > 0 ? 1 : 0)} ${units[l]}`;
+  const units = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  let l = 0, n = parseInt(bytes, 10) || 0;
+  while (n >= 1024 && ++l) n = n / 1024;
+  return `${n.toFixed(n < 10 && l > 0 ? 1 : 0)} ${units[l]}`;
 };
 
 module.exports.getStartTimestamp = async () => {
-    try {
-        const startTimeStr = await fs.readFile('time.txt', 'utf8');
-        return parseInt(startTimeStr);
-    } catch (error) {
-        return Date.now();
-    }
+  try {
+    const startTimeStr = await fsp.readFile('time.txt', 'utf8');
+    return parseInt(startTimeStr);
+  } catch (error) {
+    return Date.now();
+  }
 };
 
 module.exports.saveStartTimestamp = async (timestamp) => {
-    try {
-        await fs.writeFile('time.txt', timestamp.toString());
-    } catch (error) {
-        console.error('Error saving start timestamp:', error);
-    }
+  try {
+    await fsp.writeFile('time.txt', timestamp.toString());
+  } catch (error) {
+    console.error('Error saving start timestamp:', error);
+  }
 };
 
 module.exports.getUptime = (uptime) => {
-    const days = Math.floor(uptime / (3600 * 24));
-    const hours = Math.floor((uptime % (3600 * 24)) / 3600);
-    const mins = Math.floor((uptime % 3600) / 60);
-    const seconds = Math.floor(uptime % 60);
+  const days = Math.floor(uptime / (3600 * 24));
+  const hours = Math.floor((uptime % (3600 * 24)) / 3600);
+  const mins = Math.floor((uptime % 3600) / 60);
+  const seconds = Math.floor(uptime % 60);
 
-    return `${days} day(s), ${hours} hour(s), ${mins} minute(s), ${seconds} second(s)`;
+  return `${days} day(s), ${hours} hour(s), ${mins} minute(s), ${seconds} second(s)`;
 };
 
 module.exports.run = async ({ api, event }) => {
-    const startTime = await module.exports.getStartTimestamp();
-    const uptimeSeconds = Math.floor((Date.now() - startTime) / 1000);
-    const usage = await pidusage(process.pid);
+  const startTime = await module.exports.getStartTimestamp();
+  const uptimeSeconds = Math.floor((Date.now() - startTime) / 1000);
+  const usage = await pidusage(process.pid);
 
-    const osInfo = { cpus: require('os').cpus().length };
+  const osInfo = { cpus: os.cpus().length };
 
-    const uptimeMessage = module.exports.getUptime(uptimeSeconds);
+  const uptimeMessage = module.exports.getUptime(uptimeSeconds);
 
-    const width = 820;
-    const height = 280;
-    const canvas = createCanvas(width, height);
-    const ctx = canvas.getContext('2d');
+  const width = 820;
+  const height = 280;
+  const canvas = createCanvas(width, height);
+  const ctx = canvas.getContext('2d');
 
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(0, 0, width, height);
-    ctx.strokeStyle = "#00ff00";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(0, 0, width, height);
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0, 0, width, height);
+  ctx.strokeStyle = "#00ff00";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(0, 0, width, height);
 
-    ctx.fillStyle = "#00ff00";
-    ctx.font = "bold 28px monospace";
-    const title = "[ SYSTEM STATUS ]";
-    const titleWidth = ctx.measureText(title).width;
-    ctx.fillText(title, (width - titleWidth) / 2, 50);
+  ctx.fillStyle = "#00ff00";
+  ctx.font = "bold 28px monospace";
+  const title = "[ SYSTEM STATUS ]";
+  const titleWidth = ctx.measureText(title).width;
+  ctx.fillText(title, (width - titleWidth) / 2, 50);
 
-    ctx.font = "20px monospace";
-    const infos = [
-        `> CPU Usage : ${usage.cpu.toFixed(1)}%`,
-        `> RAM Usage : ${module.exports.byte2mb(usage.memory)}`,
-        `> CPU Cores : ${osInfo.cpus}`,
-        `> Ping      : ${Date.now() - event.timestamp}ms`,
-        `> Uptime    : ${uptimeMessage}`
-    ];
+  ctx.font = "20px monospace";
+  const infos = [
+    `> CPU Usage : ${usage.cpu.toFixed(1)}%`,
+    `> RAM Usage : ${module.exports.byte2mb(usage.memory)}`,
+    `> CPU Cores : ${osInfo.cpus}`,
+    `> Ping      : ${Date.now() - event.timestamp}ms`,
+    `> Uptime    : ${uptimeMessage}`
+  ];
 
-    let y = 100;
-    infos.forEach(line => {
-        ctx.fillText(formatFont(line), 60, y);
-        y += 35;
-    });
+  let y = 100;
+  infos.forEach(line => {
+    ctx.fillText(formatFont(line), 60, y);
+    y += 35;
+  });
 
-    const buffer = canvas.toBuffer('image/png');
-    const filePath = './uptime.png';
-    await fs.writeFile(filePath, buffer);
+  const buffer = canvas.toBuffer('image/png');
+  const filePath = './uptime.png';
+  await fsp.writeFile(filePath, buffer);
 
-    await api.sendMessage(
-        { attachment: fs.createReadStream(filePath) },
-        event.threadID,
-        event.messageID
-    );
+  await api.sendMessage(
+    { attachment: fs.createReadStream(filePath) },
+    event.threadID,
+    event.messageID
+  );
 
-    await module.exports.saveStartTimestamp(startTime);
+  await module.exports.saveStartTimestamp(startTime);
 };
