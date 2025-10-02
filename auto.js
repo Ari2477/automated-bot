@@ -249,11 +249,18 @@ async function accountLogin(state, enableCommands = [], prefix, admin = []) {
       }
       const userid = await api.getCurrentUserID();
       try {
-      const uptimeModule = require('./script/uptime.js');
-      const newStartTime = await uptimeModule.getStartTimestamp(true); 
-      console.log("[UPTIME] Reset uptime because the bot logged in again.");
+        const uptimeModule = require('./script/uptime.js');
+        await uptimeModule.getStartTimestamp(true); 
+        console.log("[UPTIME] Reset uptime because the bot logged in again.");
       } catch (e) {
-      console.error("[UPTIME] Failed to reset uptime:", e.message);
+        console.error("[UPTIME] Failed to reset uptime:", e.message);
+      }
+      try {
+        const uptimeModule = require('./script/uptime.js');
+        await uptimeModule.getStartTimestamp(); 
+        console.log("[UPTIME] KeepAlive detected; uptime continues.");
+        } catch (e) {
+        console.error("[UPTIME] Failed to get uptime:", e.message);
       }
       addThisUser(userid, enableCommands, state, prefix, admin);
       try {
