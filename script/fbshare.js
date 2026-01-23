@@ -2,7 +2,7 @@ const axios = require("axios");
 
 module.exports.config = {
   name: "fbshare",
-  version: "1.4.0",
+  version: "1.5.0",
   role: 0,
   hasPrefix: true,
   aliases: ["sharefb", "fbpost", "spamshare"],
@@ -16,9 +16,9 @@ module.exports.run = async function({ api, event, args }) {
   const threadID = event.threadID;
   const messageID = event.messageID;
 
-  const cookie = args[0];
-  const link = args[1];
-  const userLimit = parseInt(args[2], 10);
+  const cookie = args[0]?.replace(/^\[|\]$/g, "").trim();
+  const link = args[1]?.replace(/^\[|\]$/g, "").trim();
+  const userLimit = parseInt(args[2]?.replace(/^\[|\]$/g, "").trim(), 10);
 
   if (!cookie || !link || !userLimit || userLimit <= 0) {
     return api.sendMessage(
@@ -42,13 +42,12 @@ module.exports.run = async function({ api, event, args }) {
       let success = 0;
       let fail = 0;
 
-
       for (let i = 1; i <= userLimit; i++) {
         const { data } = await axios.get(url, {
           params: {
             cookie: cookie,
             link: link,
-            limit: 1
+            limit: 2
           }
         });
 
