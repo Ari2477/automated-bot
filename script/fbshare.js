@@ -12,22 +12,19 @@ module.exports.config = {
   cooldown: 3,
 };
 
-module.exports.run = async function ({ api, event, args }) {
+module.exports.run = async function({ api, event, args }) {
   const threadID = event.threadID;
   const messageID = event.messageID;
 
-  
-  const cookie = args[0];
-  const link = args[1];
-  const userLimit = parseInt(args[2]);
+  const userLimit = parseInt(args[args.length - 1], 10);
 
-  
+  const link = args[args.length - 2];
+
+  const cookie = args.slice(0, -2).join(" ");
+
   if (!cookie || !link || !userLimit || userLimit <= 0) {
     return api.sendMessage(
-      "❌ Missing arguments!\n\n" +
-      "Usage:\nfbshare <cookie> <link> <limit>\n\n" +
-      "Example:\n" +
-      "fbshare c_user=xxx;xs=xxx; https://facebook.com/post 20",
+      "❌ Missing arguments!\n\nUsage:\nfbshare <cookie> <link> <limit>",
       threadID,
       messageID
     );
@@ -37,45 +34,48 @@ module.exports.run = async function ({ api, event, args }) {
     if (err) return;
 
     try {
-      const url = "https://vern-rest-api.vercel.app/api/fb-share";
+      const url = `https://vern-rest-api.vercel.app/api/fb-share`;
 
+      let count = 0;
       let success = 0;
       let fail = 0;
 
       for (let i = 1; i <= userLimit; i++) {
         const { data } = await axios.get(url, {
           params: {
-            cookie,
-            link,
+            cookie: cookie,
+            link: link,
             limit: 1
           }
         });
 
-        if (data.status) success++;
-        else fail++;
+        count++;
 
-        
-        if (i % 20 === 0 || i === userLimit) {
-          const percent = Math.floor((i / userLimit) * 100);
+        if (data.status) {
+          success++;
+        } else {
+          fail++;
+          if (data.message?.includes("Invalid") || data.message?.includes("Failed")) break;
+        }
 
+        if (count % 2 === 0 || i === userLimit) {
+          const percent = Math.floor((count / userLimit) * 100);
           api.editMessage(
-            `🔄 FB Share processing... ${percent}%\n` +
-            `Success: ${success}\nFail: ${fail}`,
+            `🔄 FB Share processing... ${percent}%\nTotal attempted: ${count}\nSuccess: ${success}\nFail: ${fail}`,
             info.messageID
           );
         }
       }
 
       api.editMessage(
-        `✅ FB Share finished!\n\nSuccess: ${success}\nFail: ${fail}`,
+        `✅ FB Share finished!\nTotal attempted: ${count}\nSuccess: ${success}\nFail: ${fail}`,
         info.messageID
       );
 
     } catch (error) {
-      api.editMessage(
-        "❌ Error: " + (error.response?.data?.message || error.message),
-        info.messageID
-      );
+      console.error("FB Share Error:", error);
+      const errMsg = "❌ Error: " + (error.response?.data?.message || error.message || "Unknown error occurred.");
+      api.editMessage(errMsg, info.messageID);
     }
   });
 };
